@@ -9,10 +9,6 @@ A TypeScript implementation that connects local LLMs (via Ollama) to Model Conte
 - **Multi-MCP Integration**: Connect multiple MCP servers simultaneously
 - **Tool Detection**: Automatically identifies which tool to use based on queries
 - **Web Interface**: Clean UI with collapsible tool descriptions
-- **Environment Variables**: Secure API key management through .env
-- **Relative Paths**: Portable configuration that works across different setups
-- **Conversation Memory**: Maintains context between messages
-- **No Hardcoded Dependencies**: Configuration is fully customizable
 - **Comprehensive Toolset**: Filesystem, web search, and reasoning capabilities
 
 ## Setup
