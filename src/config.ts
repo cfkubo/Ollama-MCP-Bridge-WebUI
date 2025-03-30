@@ -102,7 +102,7 @@ export async function loadBridgeConfig(): Promise<BridgeConfigFile> {
       logger.info(`Loading MCP servers: ${Object.keys(config.mcpServers).join(', ')}`);
       
       return config;
-    } catch (envError) {
+    } catch (envError: any) {
       logger.warn(`.env file not found or unable to be parsed: ${envError.message}`);
       
       // Continue loading config without env substitution
