@@ -1,0 +1,35 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "node",
+      "args": [
+        "./node_modules/@modelcontextprotocol/server-filesystem/dist/index.js",
+        "../workspace"
+      ],
+      "allowedDirectory": "../workspace"
+    },
+    "brave-search": {
+      "command": "node",
+      "args": [
+        "./node_modules/@modelcontextprotocol/server-brave-search/dist/index.js"
+      ],
+      "env": {
+        "BRAVE_API_KEY": "$BRAVE_API_KEY"
+      }
+    },
+    "sequential-thinking": {
+      "command": "node",
+      "args": [
+        "./node_modules/@modelcontextprotocol/server-sequential-thinking/dist/index.js"
+      ]
+    }
+  },
+  "llm": {
+    "model": "qwen2.5-coder:7b-instruct-q4_K_M",
+    "baseUrl": "http://localhost:11434",
+    "apiKey": "ollama",
+    "temperature": 0.7,
+    "maxTokens": 8000
+  },
+  "systemPrompt": "You are a helpful assistant that can use various tools to help answer questions. You have access to three main tool groups: 1) Filesystem operations - for working with files and directories, 2) Brave search - for finding information on the web, 3) Sequential thinking for complex problem-solving. When a user asks a question that requires external information, real-time data, or file manipulation, you should use a tool rather than guessing or using only your pre-trained knowledge. HOW TO USE TOOLS: 1. Determine if a tool is needed to properly answer the user's query. 2. If a tool is needed, respond with a JSON structure in this exact format: {\"name\": \"tool_name\", \"arguments\": {\"param1\": \"value1\", \"param2\": \"value2\"}, \"thoughts\": \"Your reasoning for using this tool\"}. 3. After receiving tool results, incorporate them into your final response. WHEN TO USE TOOLS - Examples: Use 'brave_web_search' when the user asks about current events, specific facts, or anything that might have changed since your training. Use 'brave_local_search' when the user asks about local businesses or places. Use 'read_file' when the user asks about the contents of a specific file. Use 'list_directory' when the user wants to know what files exist in a directory. Use 'write_file' when the user wants to create or modify a file. Use 'sequentialthinking' for complex problem-solving that requires step-by-step reasoning. Do not apologize for using tools - they extend your capabilities. Always prefer using tools over guessing when dealing with: File operations, Current information, Local data, Complex reasoning tasks. Remember that you can only use tools that are listed below, using exactly the names provided."
+}
