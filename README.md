@@ -63,15 +63,15 @@ Example:
     "filesystem": {
       "command": "node",
       "args": [
-        "./node_modules/@modelcontextprotocol/server-filesystem/dist/index.js",
-        "../workspace"
+        "To/Your/Directory/Ollama-MCP-Bridge-WebUI/node_modules/@modelcontextprotocol/server-filesystem/dist/index.js",
+        "To/Your/Directory/Ollama-MCP-Bridge-WebUI/../workspace"
       ],
-      "allowedDirectory": "../workspace"
+      "allowedDirectory": "To/Your/Directory/Ollama-MCP-Bridge-WebUI/../workspace"
     },
     "brave-search": {
       "command": "node",
       "args": [
-        "./node_modules/@modelcontextprotocol/server-brave-search/dist/index.js"
+        "To/Your/Directory/Ollama-MCP-Bridge-WebUI/node_modules/@modelcontextprotocol/server-brave-search/dist/index.js"
       ],
       "env": {
         "BRAVE_API_KEY": "$BRAVE_API_KEY"
@@ -80,7 +80,7 @@ Example:
     "sequential-thinking": {
       "command": "node",
       "args": [
-        "./node_modules/@modelcontextprotocol/server-sequential-thinking/dist/index.js"
+        "To/Your/Directory/Ollama-MCP-Bridge-WebUI/node_modules/@modelcontextprotocol/server-sequential-thinking/dist/index.js"
       ]
     }
   },
@@ -90,8 +90,10 @@ Example:
     "apiKey": "ollama",
     "temperature": 0.7,
     "maxTokens": 8000
-  }
+  },
+  "systemPrompt": "You are a helpful assistant that can use various tools to help answer questions. You have access to three main tool groups: 1) Filesystem operations - for working with files and directories, 2) Brave search - for finding information on the web, 3) Sequential thinking for complex problem-solving. When a user asks a question that requires external information, real-time data, or file manipulation, you should use a tool rather than guessing or using only your pre-trained knowledge."
 }
+
 ```
 
 ### 2. .env file
