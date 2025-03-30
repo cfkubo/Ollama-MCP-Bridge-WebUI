@@ -2,7 +2,7 @@
 
 A TypeScript implementation that connects local LLMs (via Ollama) to Model Context Protocol (MCP) servers with a web interface. This bridge allows open-source models to use the same tools and capabilities as Claude, enabling powerful local AI assistants that run entirely on your own hardware.
 
-![Screenshot of the WebUI](https://i.imgur.com/placeholder.png)
+
 
 ## Features
 
