@@ -32,7 +32,7 @@ const DEFAULT_CONFIG: BridgeConfigFile = {
     }
   },
   llm: {
-    model: "qwen2.5:3b",
+    model: "qwen3:latest",
     baseUrl: "http://localhost:11434",
     apiKey: "ollama",
     temperature: 0.7,
@@ -120,6 +120,13 @@ export async function loadBridgeConfig(): Promise<BridgeConfigFile> {
     }
   } catch (error: any) {
     logger.warn(`Could not load bridge_config.json from ${configPath}, using defaults`);
+    if (error.code === 'ENOENT') {
+      logger.warn(`bridge_config.json not found at: ${configPath}`);
+    } else if (error instanceof SyntaxError) {
+      logger.error(`JSON parsing error in bridge_config.json: ${error.message}`);
+    } else {
+      logger.error(`Error reading bridge_config.json: ${error.message || String(error)}`);
+    }
     return DEFAULT_CONFIG;
   }
 }
