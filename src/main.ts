@@ -37,7 +37,8 @@ async function forceExit() {
         }
       });
     } else {
-      exec('pkill -f ollama', () => {});
+      
+      // exec('pkill -f ollama', () => {});
     }
   } catch (e) {
     // Ignore errors during force kill
