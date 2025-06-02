@@ -2,8 +2,9 @@ import { spawn, ChildProcess } from 'child_process';
 import { Readable, Writable } from 'stream';
 import { ServerParameters } from './types';
 import { logger } from './logger';
+import { EventEmitter } from 'events';
 
-export class MCPClient {
+export class MCPClient extends EventEmitter {
   private process: ChildProcess | null = null;
   private stdin: Writable | null = null;
   private stdout: Readable | null = null;
@@ -14,7 +15,9 @@ export class MCPClient {
   private serverVersion?: any;
   private availableTools: Set<string> = new Set();
 
-  constructor(private serverParams: ServerParameters) {}
+  constructor(private serverParams: ServerParameters) {
+    super();
+  }
 
   async connect(): Promise<void> {
     logger.debug("[MCP Client] Starting connection...");
@@ -144,6 +147,9 @@ export class MCPClient {
   }
 
   private handleResponse(data: Buffer) {
+    // Emit raw data event
+    this.emit('rawData', data.toString());
+    
     const messages = data.toString().split('\n').filter(line => line.trim());
     
     for (const message of messages) {
