@@ -85,8 +85,32 @@ export class WebServer {
       socket.on('chat message', async (message) => {
         try {
           logger.info(`Socket - Processing message: ${message}`);
-          const response = await this.bridge.processMessage(message);
-          socket.emit('chat response', response);
+          let response = await this.bridge.llmClient.invokeWithPrompt(message);
+
+          // Log and emit the initial LLM response (could be a tool call)
+          logger.info(`[WebServer] Emitting initial LLM response: ${JSON.stringify(response.content)}`);
+          socket.emit('chat response', response.content);
+
+          // If it's a tool call, process it and emit the tool result
+          while (response.isToolCall && response.toolCalls?.length) {
+            logger.info(`[WebServer] Detected tool call(s): ${JSON.stringify(response.toolCalls)}`);
+
+            // Actually call the tool(s)
+            const toolResponses = await this.bridge.handleToolCalls(response.toolCalls);
+
+            // Log and emit the tool result(s) to the client IMMEDIATELY
+            logger.info(`[WebServer] Emitting tool result(s): ${JSON.stringify(toolResponses)}`);
+            socket.emit('tool result', {
+              toolResponses
+            });
+
+            // Send the tool result(s) back to the LLM for follow-up
+            response = await this.bridge.llmClient.invoke(toolResponses);
+
+            // Log and emit the follow-up LLM response
+            logger.info(`[WebServer] Emitting follow-up LLM response: ${JSON.stringify(response.content)}`);
+            socket.emit('chat response', response.content);
+          }
         } catch (error: any) {
           logger.error(`Socket error: ${error?.message || String(error)}`);
           socket.emit('error', { error: error?.message || 'An error occurred' });
