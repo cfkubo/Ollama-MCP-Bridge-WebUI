@@ -135,6 +135,15 @@ document.addEventListener('DOMContentLoaded', () => {
         appendMessage('assistant', `Error: ${error.error}`, true);
     });
 
+    // Handle tool results
+    socket.on('tool result', (data) => {
+        if (data.toolResponses && data.toolResponses.length > 0) {
+            data.toolResponses.forEach(result => {
+                appendMessage('assistant', result.output);
+            });
+        }
+    });
+
     // Helper function to append messages
     function appendMessage(sender, content, isError = false) {
         const messageEl = document.createElement('div');
@@ -177,4 +186,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Set focus on input
     messageInput.focus();
+
+    socket.on('chat message', async (message) => {
+        try {
+            logger.info(`Socket - Processing message: ${message}`);
+            // Step 1: Get the initial LLM response (may be a tool call)
+            let response = await this.bridge.llmClient.invokeWithPrompt(message);
+
+            // Emit the initial LLM response (could be a tool call)
+            socket.emit('chat response', response.content);
+
+            // If it's a tool call, process it and emit the tool result
+            while (response.isToolCall && response.toolCalls?.length) {
+                logger.info(`Processing ${response.toolCalls.length} tool calls`);
+                // Emit a message to indicate tool call is being processed
+                socket.emit('tool call', {
+                    toolCalls: response.toolCalls
+                });
+
+                // Actually call the tool(s)
+                const toolResponses = await this.bridge.handleToolCalls(response.toolCalls);
+
+                // Emit the tool result(s) to the client
+                socket.emit('tool result', {
+                    toolResponses
+                });
+
+                // Send the tool result(s) back to the LLM for follow-up
+                response = await this.bridge.llmClient.invoke(toolResponses);
+
+                // Emit the follow-up LLM response
+                socket.emit('chat response', response.content);
+            }
+        } catch (error) {
+            logger.error(`Socket error: ${error?.message || String(error)}`);
+            socket.emit('error', { error: error?.message || 'An error occurred' });
+        }
+    });
 });
