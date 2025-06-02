@@ -153,7 +153,7 @@ export class MCPLLMBridge implements MCPLLMBridge {
     }
   }
 
-  private async handleToolCalls(toolCalls: any[]): Promise<any[]> {
+  public async handleToolCalls(toolCalls: any[]): Promise<any[]> {
     const toolResponses = [];
 
     for (const toolCall of toolCalls) {
