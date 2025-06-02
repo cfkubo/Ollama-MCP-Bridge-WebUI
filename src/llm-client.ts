@@ -84,14 +84,14 @@ export class LLMClient {
       logger.debug('Testing connection to Ollama...');
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
-      
+
       const response = await fetch(`${this.config.baseUrl}/api/tags`, {
         method: 'GET',
         signal: controller.signal
       });
-      
+
       clearTimeout(timeoutId);
-      
+
       if (response.ok) {
         const data = await response.json();
         logger.debug('Ollama connection test successful:', data);
@@ -122,7 +122,7 @@ export class LLMClient {
     try {
       // First ensure no existing Ollama process is running
       await this.forceKillOllama();
-      
+
       // Start a new Ollama process - with the same options for all platforms
       this.ollamaProcess = exec('ollama serve', { windowsHide: true });
 
@@ -181,7 +181,7 @@ export class LLMClient {
   private async forceKillOllama(): Promise<void> {
     try {
       logger.debug('Starting Ollama cleanup process...');
-      
+
       try {
         logger.debug('Attempting to kill Ollama by process name...');
         if (process.platform === 'win32') {
@@ -194,12 +194,12 @@ export class LLMClient {
       } catch (e) {
         logger.debug('No Ollama process found to kill');
       }
-      
+
       try {
         logger.debug('Checking for processes on port 11434...');
         let cmd = '';
         let pidExtractor: (line: string) => string | undefined;
-        
+
         if (process.platform === 'win32') {
           cmd = 'netstat -ano | findstr ":11434"';
           pidExtractor = (line) => {
@@ -213,10 +213,10 @@ export class LLMClient {
             return parts[1];
           };
         }
-        
+
         const { stdout } = await execAsync(cmd);
         const lines = stdout.split('\n').filter(line => line.trim());
-        
+
         for (const line of lines) {
           const pid = pidExtractor(line);
           if (pid && /^\d+$/.test(pid)) {
@@ -242,7 +242,7 @@ export class LLMClient {
 
   private prepareMessages(): any[] {
     const formattedMessages = [];
-    
+
     // Add system prompt
     if (this.systemPrompt) {
       formattedMessages.push({
@@ -250,14 +250,14 @@ export class LLMClient {
         content: this.systemPrompt
       });
     }
-    
+
     // Add conversation history (excluding the current message which is in this.messages)
     const historyToInclude = this.conversationHistory.slice(0, -1);
     formattedMessages.push(...historyToInclude);
-    
+
     // Add current message
     formattedMessages.push(...this.messages);
-    
+
     logger.debug(`Prepared ${formattedMessages.length} messages for LLM request`);
     return formattedMessages;
   }
@@ -278,20 +278,20 @@ export class LLMClient {
     }
 
     logger.debug(`Preparing to send prompt: ${prompt}`);
-    
+
     // Add new user message to conversation history
     this.conversationHistory.push({
       role: 'user',
       content: prompt
     });
-    
+
     // Prepare messages for this request, starting with system prompt and adding conversation history
     this.messages = [];
     this.messages.push({
       role: 'user',
       content: prompt
     });
-    
+
     // Limit history length if needed
     if (this.conversationHistory.length > this.maxHistoryLength * 2) { // *2 because we count pairs of messages
       const excess = this.conversationHistory.length - this.maxHistoryLength * 2;
@@ -322,13 +322,13 @@ export class LLMClient {
                 .filter((item: any) => item.type === 'text')
                 .map((item: any) => item.text)
                 .join('\n');
-              
+
               const toolMessage = {
                 role: 'tool',
                 content,
                 tool_call_id: result.tool_call_id
               };
-              
+
               this.messages.push(toolMessage);
               this.conversationHistory.push(toolMessage);
             } else {
@@ -337,7 +337,7 @@ export class LLMClient {
                 content: String(toolOutput),
                 tool_call_id: result.tool_call_id
               };
-              
+
               this.messages.push(toolMessage);
               this.conversationHistory.push(toolMessage);
             }
@@ -348,7 +348,7 @@ export class LLMClient {
               content: String(toolOutput),
               tool_call_id: result.tool_call_id
             };
-            
+
             this.messages.push(toolMessage);
             this.conversationHistory.push(toolMessage);
           }
@@ -451,7 +451,7 @@ export class LLMClient {
           logger.debug('Cleaned Markdown response:', content);
         }
         const contentObj = typeof content === 'string' ? JSON.parse(content) : content;
-        
+
         if (contentObj.name && contentObj.arguments) {
           isToolCall = true;
           toolCalls = [{
@@ -475,7 +475,7 @@ export class LLMClient {
       };
 
       // Create the assistant response message
-      const assistantMessage = result.isToolCall 
+      const assistantMessage = result.isToolCall
         ? {
             role: 'assistant',
             content: result.content,
@@ -492,13 +492,13 @@ export class LLMClient {
             role: 'assistant',
             content: result.content
           };
-      
+
       // Add to current messages
       this.messages.push(assistantMessage);
-      
+
       // Also add to conversation history for future context
       this.conversationHistory.push(assistantMessage);
-      
+
       logger.debug(`Conversation history now has ${this.conversationHistory.length} messages`);
 
       return result;
